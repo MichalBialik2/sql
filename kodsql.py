@@ -78,81 +78,122 @@ class BazaDanych:
 
     def _utworz_tabele(self):
         schema = """
-        PRAGMA foreign_keys = ON;
+PRAGMA foreign_keys = ON;
 
-        CREATE TABLE IF NOT EXISTS szkola (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nazwa TEXT NOT NULL
-        );
+CREATE TABLE IF NOT EXISTS szkola (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nazwa TEXT NOT NULL UNIQUE
+);
 
-        CREATE TABLE IF NOT EXISTS ranking (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            szkola_id INTEGER NOT NULL,
-            pozycja INTEGER NOT NULL,
-            FOREIGN KEY (szkola_id) REFERENCES szkola(id) ON DELETE CASCADE ON UPDATE CASCADE
-        );
+CREATE TABLE IF NOT EXISTS ranking (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    szkola_id INTEGER NOT NULL,
+    pozycja INTEGER NOT NULL,
+    FOREIGN KEY (szkola_id)
+        REFERENCES szkola(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_ranking_szkola ON ranking(szkola_id);
 
-        CREATE TABLE IF NOT EXISTS nauczyciel (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            szkola_id INTEGER NOT NULL,
-            imie TEXT NOT NULL,
-            nazwisko TEXT NOT NULL,
-            FOREIGN KEY (szkola_id) REFERENCES szkola(id) ON DELETE CASCADE ON UPDATE CASCADE
-        );
+CREATE TABLE IF NOT EXISTS nauczyciel (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    szkola_id INTEGER NOT NULL,
+    imie TEXT NOT NULL,
+    nazwisko TEXT NOT NULL,
+    FOREIGN KEY (szkola_id)
+        REFERENCES szkola(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_nauczyciel_szkola ON nauczyciel(szkola_id);
 
-        CREATE TABLE IF NOT EXISTS profil_klasy (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nazwa TEXT NOT NULL
-        );
+CREATE TABLE IF NOT EXISTS profil_klasy (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nazwa TEXT NOT NULL UNIQUE
+);
 
-        CREATE TABLE IF NOT EXISTS klasa (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            szkola_id INTEGER NOT NULL,
-            nazwa TEXT NOT NULL,
-            profil_id INTEGER,
-            FOREIGN KEY (szkola_id) REFERENCES szkola(id) ON DELETE CASCADE ON UPDATE CASCADE,
-            FOREIGN KEY (profil_id) REFERENCES profil_klasy(id) ON DELETE SET NULL ON UPDATE CASCADE
-        );
+CREATE TABLE IF NOT EXISTS klasa (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    szkola_id INTEGER NOT NULL,
+    nazwa TEXT NOT NULL,
+    profil_id INTEGER,
+    FOREIGN KEY (szkola_id)
+        REFERENCES szkola(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (profil_id)
+        REFERENCES profil_klasy(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_klasa_szkola ON klasa(szkola_id);
+CREATE INDEX IF NOT EXISTS idx_klasa_profil ON klasa(profil_id);
 
-        CREATE TABLE IF NOT EXISTS uczen (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            szkola_id INTEGER NOT NULL,
-            imie TEXT NOT NULL,
-            nazwisko TEXT NOT NULL,
-            klasa_id INTEGER,
-            FOREIGN KEY (szkola_id) REFERENCES szkola(id) ON DELETE CASCADE ON UPDATE CASCADE,
-            FOREIGN KEY (klasa_id) REFERENCES klasa(id) ON DELETE SET NULL ON UPDATE CASCADE
-        );
+CREATE TABLE IF NOT EXISTS uczen (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    szkola_id INTEGER NOT NULL,
+    imie TEXT NOT NULL,
+    nazwisko TEXT NOT NULL,
+    klasa_id INTEGER,
+    FOREIGN KEY (szkola_id)
+        REFERENCES szkola(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (klasa_id)
+        REFERENCES klasa(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_uczen_szkola ON uczen(szkola_id);
+CREATE INDEX IF NOT EXISTS idx_uczen_klasa ON uczen(klasa_id);
 
-        CREATE TABLE IF NOT EXISTS legitymacja (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            uczen_id INTEGER NOT NULL,
-            aktualna INTEGER NOT NULL DEFAULT 1,
-            numer TEXT,
-            FOREIGN KEY (uczen_id) REFERENCES uczen(id) ON DELETE CASCADE ON UPDATE CASCADE
-        );
+CREATE TABLE IF NOT EXISTS legitymacja (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    uczen_id INTEGER NOT NULL UNIQUE,
+    aktualna INTEGER NOT NULL DEFAULT 1,
+    numer TEXT,
+    FOREIGN KEY (uczen_id)
+        REFERENCES uczen(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_legitymacja_uczen ON legitymacja(uczen_id);
 
-        CREATE TABLE IF NOT EXISTS srednia (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            uczen_id INTEGER NOT NULL,
-            wartosc REAL NOT NULL,
-            FOREIGN KEY (uczen_id) REFERENCES uczen(id) ON DELETE CASCADE ON UPDATE CASCADE
-        );
+CREATE TABLE IF NOT EXISTS srednia (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    uczen_id INTEGER NOT NULL UNIQUE,
+    wartosc REAL NOT NULL,
+    FOREIGN KEY (uczen_id)
+        REFERENCES uczen(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_srednia_uczen ON srednia(uczen_id);
 
-        CREATE TABLE IF NOT EXISTS przedmiot (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nazwa TEXT NOT NULL
-        );
+CREATE TABLE IF NOT EXISTS przedmiot (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nazwa TEXT NOT NULL UNIQUE
+);
 
-        CREATE TABLE IF NOT EXISTS ocena (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            uczen_id INTEGER NOT NULL,
-            przedmiot_id INTEGER NOT NULL,
-            wartosc REAL NOT NULL,
-            FOREIGN KEY (uczen_id) REFERENCES uczen(id) ON DELETE CASCADE ON UPDATE CASCADE,
-            FOREIGN KEY (przedmiot_id) REFERENCES przedmiot(id) ON DELETE CASCADE ON UPDATE CASCADE
-        );
-        """
+CREATE TABLE IF NOT EXISTS ocena (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    uczen_id INTEGER NOT NULL,
+    przedmiot_id INTEGER NOT NULL,
+    wartosc REAL NOT NULL,
+    FOREIGN KEY (uczen_id)
+        REFERENCES uczen(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (przedmiot_id)
+        REFERENCES przedmiot(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_ocena_uczen ON ocena(uczen_id);
+CREATE INDEX IF NOT EXISTS idx_ocena_przedmiot ON ocena(przedmiot_id);
+"""
+
 
         with self._polaczenie() as conn:
             conn.executescript(schema)
