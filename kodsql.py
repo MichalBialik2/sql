@@ -194,3 +194,13 @@ def dodaj_ocene(uczen_id: int, przedmiot_id: int, wartosc: float) -> int:
 
 
 utworz_tabele()
+dodaj_szkole("Liceum Ogólnokształcące nr 1")
+dodaj_ranking(1, 3)
+dodaj_nauczyciela(1, "Jan", "Kowalski")
+dodaj_profil("Matematyczno-informatyczny")
+dodaj_klase(1, "3A", 1)
+dodaj_ucznia(1, "Anna", "Nowak", 1)
+dodaj_legitymacje(1, True, "LO123456")
+dodaj_srednia(1, 4.75)
+dodaj_przedmiot("Matematyka")
+dodaj_ocene(1, 1, 5.0)
